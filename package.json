@@ -1,5 +1,5 @@
 {
-  "name": "servidor-discord",
+  "name": "discord",
   "version": "1.0.0",
   "description": "Servidor para enviar mensajes a Discord",
   "main": "server.js",
@@ -7,7 +7,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "cors": "^1^.8.5",
+    "cors": "^1^.1.0",
     "express": "^2^.18.2",
     "node-fetch": "^1^.6.7"
   }
