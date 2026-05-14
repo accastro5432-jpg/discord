@@ -11,8 +11,8 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 app.use(cors());
 app.use(express.json());
 
+// Endpoint principal que recibe los datos de tu web
 app.post('/api/enviar', async (req, res) => {
-    // El cuerpo ahora puede ser { mensaje, ip } o { embeds: [...] }
     const body = req.body; 
 
     if (!body) {
@@ -20,7 +20,6 @@ app.post('/api/enviar', async (req, res) => {
     }
 
     try {
-        // Enviamos directamente lo que recibimos. Discord sabrá si es un texto plano o un embed.
         await fetch(DISCORD_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -33,6 +32,19 @@ app.post('/api/enviar', async (req, res) => {
     }
 });
 
+// Endpoint para mantener el servidor despierto (Keep-Alive)
+app.get('/', (req, res) => {
+  res.send('Servidor activo y listo.');
+});
+
+// Iniciamos el servidor
 app.listen(port, () => {
     console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
+// Llamada a sí mismo cada 10 minutos para evitar el sleep mode
+setInterval(() => {
+  fetch(`https://discord-wqsm.onrender.com/`)
+    .then(() => console.log('Keep-alive enviado.'))
+    .catch(err => console.error('Error en keep-alive:', err));
+}, 10 * 60 * 1000); // 10 minutos
