@@ -6,31 +6,24 @@ const fetch = require('node-fetch');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// El webhook lo configuraremos en Render, no aquí.
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
-// Permite peticiones de cualquier lugar (para pruebas)
-app.use(cors()); 
-// Para que entienda JSON
+app.use(cors());
 app.use(express.json());
 
-// Endpoint que recibe los datos de tu web
+// Endpoint para recibir los datos de tus páginas
 app.post('/api/enviar', async (req, res) => {
-    const { mensaje, ip } = req.body;
+    const body = req.body; 
 
-    if (!mensaje || !DISCORD_WEBHOOK_URL) {
-        return res.status(400).send('Falta el mensaje o el webhook no está configurado.');
+    if (!body) {
+        return res.status(400).send('El cuerpo de la petición está vacío.');
     }
-
-    const payload = {
-        content: `**IP:** ${ip}\n${mensaje}`
-    };
 
     try {
         await fetch(DISCORD_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(body)
         });
         res.status(200).send('OK');
     } catch (error) {
@@ -39,6 +32,18 @@ app.post('/api/enviar', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Servidor corriendo en el puerto ${port}`);
+// Endpoint para mantener el servidor despierto (Keep-Alive)
+app.get('/', (req, res) => {
+  res.send('Servidor activo y listo.');
 });
+
+app.listen(port, () => {
+    console.log(`🚀 Servidor corriendo en el puerto ${port}`);
+});
+
+// Llamada a sí mismo cada 10 minutos para evitar el sleep mode
+setInterval(() => {
+  fetch(`https://discord-wqsm.onrender.com/`)
+    .then(() => console.log('Keep-alive enviado.'))
+    .catch(err => console.error('Error en keep-alive:', err));
+}, 10 * 60 * 1000); // 10 minutos
